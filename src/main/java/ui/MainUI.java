@@ -1,6 +1,7 @@
 package ui;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,7 @@ class DataFetcher {
     private ArrayList<Double> cena;
     private ArrayList<Double> koszt;
     private ArrayList<ArrayList<Double>> transport;
+    private ArrayList<ArrayList<Double>> result;
     public DataFetcher(int dostawcy, int odbiorcy) {
         this.dostawcy = dostawcy;
         this.odbiorcy = odbiorcy;
@@ -21,8 +23,41 @@ class DataFetcher {
         koszt = new ArrayList<>(Collections.nCopies(dostawcy, 0.));
         podaz = new ArrayList<>(Collections.nCopies(dostawcy, 0.));
         transport = new ArrayList<>(dostawcy);
+        result = new ArrayList<>();
         for (int i = 0; i< dostawcy; ++i) {
             transport.add(new ArrayList<>(Collections.nCopies(odbiorcy, 0.)));
+        }
+    }
+
+    public void parseData(GridComponent gridComponent) {
+        for (ArrayList<TextField> l : gridComponent.getTextFields()) {
+            for (TextField t: l) {
+                if (Double.parseDouble(t.getjTextField().getText())!=0.) {
+                    if (t.getRow() == 0) {
+                        this.setCena(t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
+                    } else if (t.getRow() == 1) {
+                        this.setPopyt(t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
+                    } else if (t.getCol() == 0) {
+                        this.setKoszt(t.getRow() - 2, Double.parseDouble(t.getjTextField().getText()));
+                    } else if (t.getCol() == 1) {
+                        this.setPodaz(t.getRow() - 2, Double.parseDouble(t.getjTextField().getText()));
+                    } else {
+                        this.setTransport(t.getRow() - 2, t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
+                    }
+                }
+            }
+        }
+    }
+
+    public void optimizeTransport() {
+        //tutaj wywolanie obliczenia
+        //do testow
+        result = new ArrayList<>(dostawcy);
+        for (int i = 0; i< dostawcy; ++i) {
+            result.add(new ArrayList<>());
+            for (int j = 0; j< odbiorcy; ++j) {
+                result.get(i).add(i + j/10.0);
+            }
         }
     }
 
@@ -64,6 +99,18 @@ class DataFetcher {
 
     public void setTransport(int row, int col, double value) {
         this.transport.get(row).set(col, value);
+    }
+
+    public ArrayList<ArrayList<Double>> getResult() {
+        return result;
+    }
+
+    public int getDostawcy() {
+        return dostawcy;
+    }
+
+    public int getOdbiorcy() {
+        return odbiorcy;
     }
 }
 
@@ -266,7 +313,6 @@ public class MainUI {
     private JButton displayButton;
     private JScrollPane contentPane;
     private GridComponent gridComponent;
-
     private JButton AddColumnButton;
     private JButton RemoveColumnButton;
     private JButton AddRowButton;
@@ -297,23 +343,9 @@ public class MainUI {
         try {
             this.checkData();
             dataFetcher = new DataFetcher(gridComponent.getHeight(), gridComponent.getWidth());
-            for (ArrayList<TextField> l : gridComponent.getTextFields()) {
-                for (TextField t: l) {
-                    if (Double.parseDouble(t.getjTextField().getText())!=0.) {
-                        if (t.getRow() == 0) {
-                            dataFetcher.setCena(t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
-                        } else if (t.getRow() == 1) {
-                            dataFetcher.setPopyt(t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
-                        } else if (t.getCol() == 0) {
-                            dataFetcher.setKoszt(t.getRow() - 2, Double.parseDouble(t.getjTextField().getText()));
-                        } else if (t.getCol() == 1) {
-                            dataFetcher.setPodaz(t.getRow() - 2, Double.parseDouble(t.getjTextField().getText()));
-                        } else {
-                            dataFetcher.setTransport(t.getRow() - 2, t.getCol() - 2, Double.parseDouble(t.getjTextField().getText()));
-                        }
-                    }
-                }
-            }
+            dataFetcher.parseData(gridComponent);
+            dataFetcher.optimizeTransport();
+            this.displayResult();
         } catch (Exception e) {
             errorWindow(e);
         }
@@ -375,6 +407,32 @@ public class MainUI {
             }
         }
         System.out.println();
+    }
+    public void displayResult(){
+        String title = "Optymalny transport";
+        JScrollPane scrollPane = new JScrollPane();
+        JPanel panel = new JPanel(new GridLayout(dataFetcher.getDostawcy() + 1, dataFetcher.getOdbiorcy() + 1, 5, 5));
+        //generuj macierz
+        for (int i = 0; i < dataFetcher.getDostawcy() + 1; ++i) {
+            for (int j = 0; j < dataFetcher.getOdbiorcy() + 1; ++j) {
+                JLabel label = new JLabel("");
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                if (i == 0 && j != 0){
+                    label.setText("O" + j);
+                } else if (j == 0 && i != 0) {
+                    label.setText("D" + i);
+                } else if (i != 0 && j != 0){
+                    label.setText(Double.toString(dataFetcher.getResult().get(i - 1).get(j - 1)));
+                    label.setBorder(new EtchedBorder());
+                    label.setOpaque(true);
+                    label.setBackground(Color.white);
+                }
+                panel.add(label);
+            }
+        }
+        scrollPane.setViewportView(panel);
+        JOptionPane.showConfirmDialog(null, scrollPane, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
     }
     public void createAddColumnButton() {
         AddColumnButton = gridComponent.getAddColumnButton();
