@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 class DataFetcher {
-    private int dostawcy;
-    private int odbiorcy;
-    private ArrayList<Double> popyt;
-    private ArrayList<Double> podaz;
-    private ArrayList<Double> cena;
-    private ArrayList<Double> koszt;
-    private ArrayList<ArrayList<Double>> transport;
+    private final int dostawcy;
+    private final int odbiorcy;
+    private final ArrayList<Double> popyt;
+    private final ArrayList<Double> podaz;
+    private final ArrayList<Double> cena;
+    private final ArrayList<Double> koszt;
+    private final ArrayList<ArrayList<Double>> transport;
     private ArrayList<ArrayList<Double>> result;
     public DataFetcher(int dostawcy, int odbiorcy) {
         this.dostawcy = dostawcy;
@@ -115,17 +115,15 @@ class DataFetcher {
 }
 
 class TextField {
-    private JPanel panel;
-    private double val;
-    private int row;
-    private int col;
+    private final JPanel panel;
+    private final int row;
+    private final int col;
 
     JTextField jTextField;
 
     public TextField(int row, int col, double val) {
         this.col = col;
         this.row = row;
-        this.val = val;
         jTextField = new JTextField(Double.toString(val));
         jTextField.setHorizontalAlignment(SwingConstants.CENTER);
         panel = new JPanel(new GridLayout(1,1));
@@ -166,10 +164,10 @@ class GridComponent {
 
     private ArrayList<ArrayList<TextField>> textFields;
 
-    private JButton AddColumnButton;
-    private JButton RemoveColumnButton;
-    private JButton AddRowButton;
-    private JButton RemoveRowButton;
+    private final JButton AddColumnButton;
+    private final JButton RemoveColumnButton;
+    private final JButton AddRowButton;
+    private final JButton RemoveRowButton;
     JPanel gridPanel;
     public GridComponent(int height, int width) {
         this.height = height;
@@ -205,23 +203,19 @@ class GridComponent {
                 if (rows < 2 && cols < 2) {
                     textField.setVisible(false);
                 } else if(rows == 0 && cols < newWidth-1){
-                    desc = "Cena dla Odbiorcy " + Integer.toString(cols-1);
+                    desc = "Cena dla Odbiorcy " + (cols - 1);
                 } else if(rows == 1 && cols < newWidth-1){
-                    desc = "Popyt Odbiorcy " + Integer.toString(cols-1);
+                    desc = "Popyt Odbiorcy " + (cols - 1);
                 } else if(cols == 0 && rows < newHeight-1){
-                    desc = "Koszt dla Dostawcy  " + Integer.toString(rows-1);
+                    desc = "Koszt dla Dostawcy  " + (rows - 1);
                 } else if(cols == 1 && rows < newHeight-1){
-                    desc = "Podaż Dostawcy  " + Integer.toString(rows-1);
+                    desc = "Podaż Dostawcy  " + (rows - 1);
                 } else if (cols == newWidth-1) { //guzik dodaj
                     if (rows ==0) {
                         gridPanel2.add(AddColumnButton);
                         continue;
                     } else if (rows == 1) {
-                        if (width == 3) {
-                            RemoveColumnButton.setEnabled(false);
-                        } else {
-                            RemoveColumnButton.setEnabled(true);
-                        }
+                        RemoveColumnButton.setEnabled(width != 3);
                         gridPanel2.add(RemoveColumnButton);
                         continue;
                     } else {
@@ -232,11 +226,7 @@ class GridComponent {
                         gridPanel2.add(AddRowButton);
                         continue;
                     } else if (cols ==1) {
-                        if (height == 2) {
-                            RemoveRowButton.setEnabled(false);
-                        } else {
-                            RemoveRowButton.setEnabled(true);
-                        }
+                        RemoveRowButton.setEnabled(height != 2);
                         gridPanel2.add(RemoveRowButton);
                         continue;
                     } else {
@@ -312,7 +302,7 @@ public class MainUI {
     private JPanel rootPanel;
     private JButton displayButton;
     private JScrollPane contentPane;
-    private GridComponent gridComponent;
+    private final GridComponent gridComponent;
     private JButton AddColumnButton;
     private JButton RemoveColumnButton;
     private JButton AddRowButton;
@@ -331,7 +321,7 @@ public class MainUI {
         RemoveColumnButton = new JButton();
         RemoveRowButton = new JButton();
         createDisplayButton();
-        createAddColumnButton();;
+        createAddColumnButton();
         createRemoveColumnButton();
         createAddRowButton();
         createRemoveRowButton();
@@ -351,9 +341,8 @@ public class MainUI {
         }
     }
     public void checkData() throws Exception {
-        int row = 0;
-        int col = 0;
-        String message = "\n";
+        StringBuilder message = new StringBuilder("\n");
+        displayData();
         for (ArrayList<TextField> l: gridComponent.getTextFields()) {
             for (TextField t : l) {
                 double num = 0;
@@ -361,22 +350,22 @@ public class MainUI {
                     num = Double.parseDouble(t.getjTextField().getText());
                 } catch (NumberFormatException nfe) {
                     if (t.getRow() == 0) {
-                        message+= "Podana cena dla Odbiorcy " + (t.getCol() - 1) + " nie jest liczbą!";
+                        message.append("Podana cena dla Odbiorcy ").append(t.getCol() - 1).append(" nie jest liczbą!");
                     } else if (t.getRow() == 1) {
-                        message+= "Podany popyt dla Odbiorcy " + (t.getCol() - 1) + " nie jest liczbą!";
+                        message.append("Podany popyt dla Odbiorcy ").append(t.getCol() - 1).append(" nie jest liczbą!");
                     } else if (t.getCol()==0) {
-                        message+= "Podany koszt dla Dostawcy " + (t.getRow() - 1) + " nie jest liczbą!";
+                        message.append("Podany koszt dla Dostawcy ").append(t.getRow() - 1).append(" nie jest liczbą!");
                     } else if (t.getCol() == 1) {
-                        message+= "Podana podaż dla Dostawcy " + (t.getRow() - 1) + " nie jest liczbą!";
+                        message.append("Podana podaż dla Dostawcy ").append(t.getRow() - 1).append(" nie jest liczbą!");
                     } else {
-                        message+= "Podany koszt transportu między Dostawcą " + (t.getRow() - 1) + " a Odbiorcą " + (t.getCol() - 1) + " nie jest liczbą!";
+                        message.append("Podany koszt transportu między Dostawcą ").append(t.getRow() - 1).append(" a Odbiorcą ").append(t.getCol() - 1).append(" nie jest liczbą!");
                     }
                 }
                 if (num < 0) {
-                    message += "Czas wykonania zadania jest mniejszy od 0!\n";
+                    message.append("Czas wykonania zadania jest mniejszy od 0!\n");
                 }
-                if (!message.equals("\n")) {
-                    throw new Exception(message);
+                if (!message.toString().equals("\n")) {
+                    throw new Exception(message.toString());
                 }
             }
         }
@@ -421,7 +410,7 @@ public class MainUI {
                     label.setText("O" + j);
                 } else if (j == 0 && i != 0) {
                     label.setText("D" + i);
-                } else if (i != 0 && j != 0){
+                } else if (i != 0){
                     label.setText(Double.toString(dataFetcher.getResult().get(i - 1).get(j - 1)));
                     label.setBorder(new EtchedBorder());
                     label.setOpaque(true);
