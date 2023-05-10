@@ -28,11 +28,11 @@ public class TransportationProblem {
 
     }
 
-    public void setStock(double value, int index){
+    public void setSupply(double value, int index){
         stock[index] = value;
     }
 
-    public void setRequired(double value, int index){
+    public void setDemand(double value, int index){
         required[index] = value;
     }
 
@@ -45,6 +45,9 @@ public class TransportationProblem {
      * initializes the feasible solution list using the North-West Corner
      * @return time elapsed
      */
+    public LinkedList<Variable> getFeasible(){
+        return feasible;
+    }
 
     public double northWestCorner() {
         long start = System.nanoTime();
@@ -164,57 +167,4 @@ public class TransportationProblem {
         return result;
 
     }
-
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws IOException {
-        // TODO code application logic here
-
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Please enter the problem size:");
-        int s = scanner.nextInt();
-        int r = scanner.nextInt();
-        double x;
-        TransportationProblem test = new TransportationProblem(s, r);
-
-        System.out.println("Please enter the stocks capacity:");
-        for (int i = 0; i < test.stockSize; i++){
-            x = scanner.nextDouble();
-            test.setStock(x, i);
-        }
-
-        System.out.println("Please enter the requirements:");
-        for (int i = 0; i < test.requiredSize; i++){
-            x = scanner.nextDouble();
-            test.setRequired(x, i);
-        }
-
-        System.out.println("Please enter the transportation costs:");
-        for (int i = 0; i < test.stockSize; i++)
-            for (int j = 0; j < test.requiredSize; j++) {
-                x = scanner.nextDouble();
-                test.setCost(x, i, j);
-            }
-
-        //test.northWestCorner();
-        test.leastCostRule();
-
-        for(Variable t: test.feasible){
-            System.out.println(t);
-        }
-
-        System.out.println("Target function: " + test.getSolution());
-
-    }
-
-
-
-
-
-
-
-
 }
