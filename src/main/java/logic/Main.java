@@ -6,11 +6,9 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        MainLogic mainLogic = new MainLogic();
-        mainLogic.test();
         try{
-            //MainLogic mainLogic = new MainLogic();
-            //mainLogic.test();
+            MainLogic mainLogic = new MainLogic();
+            mainLogic.test();
             //SwingUtilities.invokeLater(Main::createGUI);
 
         } catch (Exception e) {

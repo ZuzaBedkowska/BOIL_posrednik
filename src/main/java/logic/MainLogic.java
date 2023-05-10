@@ -50,6 +50,14 @@ public class MainLogic {
             resultTable[f.getStock()][f.getRequired()] = f.getValue();
         }
         //calc profit
+        System.out.println("individual profit= ");
+        for (int s = 0; s < n_suppliers - 1; s++) { //without last
+            for (int c = 0; c < n_customers - 1; c++) { //without last
+                System.out.print(profitTable[s][c] + " \t");
+            }
+            System.out.println();
+        }
+        System.out.println("optimal transport= ");
         double profit = 0., cost_transport = 0., cost_purchase = 0., income_from_sell = 0.;
         for (int s = 0; s < n_suppliers - 1; s++) { //without last
             for (int c = 0; c < n_customers - 1; c++) { //without last
