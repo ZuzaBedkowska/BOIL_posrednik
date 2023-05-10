@@ -1,8 +1,4 @@
 package logic;
-
-
-import java.util.LinkedList;
-
 public class MainLogic {
     double[] supply = {45, 25, 60};
     double[] demand = {30, 30, 70};
@@ -13,7 +9,6 @@ public class MainLogic {
     double[][] reverseProfitTable;
     double[][] resultTable;
     int n_suppliers, n_customers;
-
     public MainLogic() {
         n_suppliers=2 + 1;
         n_customers=2 + 1;
@@ -24,11 +19,9 @@ public class MainLogic {
             for (int c = 0; c <n_customers; c++)
                 resultTable[s][c]=0.;
     }
-
     public void test(){
         calc();
     }
-
     public void calc(){
         calcProfitTable();
         TransportationProblem transportationProblem = new TransportationProblem(n_suppliers, n_customers); //init
@@ -74,7 +67,6 @@ public class MainLogic {
         System.out.println("income_from_sell = "+income_from_sell);
         System.out.println("profit           = "+profit);
     }
-
     private void calcProfitTable(){
         //dumbest approach ever
         for(int s = 0; s < n_suppliers; s++)
@@ -93,6 +85,4 @@ public class MainLogic {
             for (int c = 0; c < n_customers; c++)
                 reverseProfitTable[s][c] = maxValue - profitTable[s][c];
     }
-
-
 }

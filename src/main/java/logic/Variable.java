@@ -1,9 +1,7 @@
 package logic;
-
 import java.util.Formatter;
 
 public class Variable {
-
     private int stock;
     private int required;
     private double value;
