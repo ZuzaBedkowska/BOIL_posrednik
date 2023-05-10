@@ -12,6 +12,9 @@ public class MainLogic {
     double[][] reverseProfitTable;
     double[][] resultTable;
     int n_suppliers, n_customers;
+
+    double profit = 0., cost_purchase = 0., cost_transport = 0., income_from_sell = 0.;
+    double[][] individual_profit, optimal_transport;
     public MainLogic(int n_suppliers_in, int n_customers_in, double[] supply, double[] demand, double[] purchasePrices, double[] sellPrices, double[][] transportCostsTable) {
         this.n_suppliers = n_suppliers_in + 1;
         this.n_customers = n_customers_in + 1;
@@ -57,9 +60,6 @@ public class MainLogic {
             }
         }
     }
-    public void test(){
-        calc();
-    }
     public void calc(){
         calcProfitTable();
         TransportationProblem transportationProblem = new TransportationProblem(n_suppliers, n_customers); //init
@@ -81,18 +81,21 @@ public class MainLogic {
             resultTable[f.getStock()][f.getRequired()] = f.getValue();
         }
         //calc profit
+        individual_profit = new double[n_suppliers-1][n_customers-1];
+        optimal_transport = new double[n_suppliers-1][n_customers-1];
         System.out.println("individual profit= ");
         for (int s = 0; s < n_suppliers - 1; s++) { //without last
             for (int c = 0; c < n_customers - 1; c++) { //without last
                 System.out.print(profitTable[s][c] + " \t");
+                individual_profit[s][c] = profitTable[s][c];
             }
             System.out.println();
         }
         System.out.println("optimal transport= ");
-        double profit = 0., cost_transport = 0., cost_purchase = 0., income_from_sell = 0.;
         for (int s = 0; s < n_suppliers - 1; s++) { //without last
             for (int c = 0; c < n_customers - 1; c++) { //without last
                 System.out.print(resultTable[s][c]+" \t");
+                optimal_transport[s][c] = resultTable[s][c];
                 profit += resultTable[s][c] * profitTable[s][c];
                 cost_purchase += resultTable[s][c] * purchasePrices[s];
                 income_from_sell += resultTable[s][c] * sellPrices[c];
@@ -123,4 +126,11 @@ public class MainLogic {
             for (int c = 0; c < n_customers; c++)
                 reverseProfitTable[s][c] = maxValue - profitTable[s][c];
     }
+
+    public double getProfit() { return profit; }
+    public double getCost_purchase() { return cost_purchase; }
+    public double getCost_transport() { return cost_transport; }
+    public double getIncome_from_sell() { return income_from_sell; }
+    public double[][] getIndividual_profit() { return individual_profit; }
+    public double[][] getOptimal_transport() { return optimal_transport; }
 }
