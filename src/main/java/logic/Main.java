@@ -7,10 +7,16 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         try{
-            MainLogic mainLogic = new MainLogic();
+            int n_suppliers = 2;
+            int n_customers = 2;
+            double[] supply = {45, 25};
+            double[] demand = {30, 30};
+            double[] purchasePrices = {6, 7};
+            double[] sellPrices = {12, 13};
+            double[][] transportCostsTable = {{7, 4}, {3, 5}};
+            MainLogic mainLogic = new MainLogic(n_suppliers,n_customers,supply,demand,purchasePrices,sellPrices,transportCostsTable);
             mainLogic.test();
             //SwingUtilities.invokeLater(Main::createGUI);
-
         } catch (Exception e) {
             String message = "Something went wrong!\n";
             if (e.getMessage() != null) {

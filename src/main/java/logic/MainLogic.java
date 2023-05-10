@@ -1,23 +1,61 @@
 package logic;
+
+import java.util.Arrays;
+
 public class MainLogic {
-    double[] supply = {45, 25, 60};
-    double[] demand = {30, 30, 70};
-    double[] purchasePrices = {6, 7, 0};
-    double[] sellPrices = {12, 13, 0};
-    double[][] transportCostsTable = {{7, 4, 0}, {3, 5, 0}, {0, 0, 0}};
+    double[] supply;
+    double[] demand;
+    double[] purchasePrices ;
+    double[] sellPrices;
+    double[][] transportCostsTable;
     double[][] profitTable;
     double[][] reverseProfitTable;
     double[][] resultTable;
     int n_suppliers, n_customers;
-    public MainLogic() {
-        n_suppliers=2 + 1;
-        n_customers=2 + 1;
-        profitTable = new double[n_suppliers][n_customers];
-        reverseProfitTable = new double[n_suppliers][n_customers];
-        resultTable = new double[n_suppliers][n_customers];
-        for (int s = 0; s < n_suppliers; s++)
-            for (int c = 0; c <n_customers; c++)
-                resultTable[s][c]=0.;
+    public MainLogic(int n_suppliers_in, int n_customers_in, double[] supply, double[] demand, double[] purchasePrices, double[] sellPrices, double[][] transportCostsTable) {
+        this.n_suppliers = n_suppliers_in + 1;
+        this.n_customers = n_customers_in + 1;
+        //init arrays
+        this.supply = new double[n_suppliers];
+        this.demand = new double[n_customers];
+        this.purchasePrices = new double[n_suppliers];
+        this.sellPrices = new double[n_customers];
+        this.transportCostsTable = new double[n_suppliers][n_customers];
+        this.profitTable = new double[n_suppliers][n_customers];
+        this.reverseProfitTable = new double[n_suppliers][n_customers];
+        this.resultTable = new double[n_suppliers][n_customers];
+        //copy values - hard way
+        for (int s = 0; s < n_suppliers; s++) {
+            for (int c = 0; c < n_customers; c++) {
+                this.resultTable[s][c] = 0.;
+                if (s == this.n_suppliers-1 || c == this.n_customers-1) { //dummies
+                    this.transportCostsTable[s][c] = 0;
+                }
+                else { //rest
+                    this.transportCostsTable[s][c] = transportCostsTable[s][c];
+                }
+            }
+        }
+        for (int s = 0; s < n_suppliers; s++) {
+            if (s == this.n_suppliers-1 ) { //dummies
+                this.supply[s] = Arrays.stream(demand).sum();
+                this.purchasePrices[s] = 0;
+            }
+            else { //rest
+                this.supply[s] = supply[s];
+                this.purchasePrices[s] = purchasePrices[s];
+            }
+        }
+        for (int c = 0; c < n_customers; c++) {
+            if (c == this.n_customers-1 ) { //dummies
+                this.demand[c] =  Arrays.stream(supply).sum();;
+                this.sellPrices[c] = 0;
+            }
+            else { //rest
+                this.demand[c] = demand[c];
+                this.sellPrices[c] = sellPrices[c];
+            }
+        }
     }
     public void test(){
         calc();
