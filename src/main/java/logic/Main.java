@@ -6,8 +6,12 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
+        MainLogic mainLogic = new MainLogic();
+        mainLogic.test();
         try{
-            SwingUtilities.invokeLater(Main::createGUI);
+            //MainLogic mainLogic = new MainLogic();
+            //mainLogic.test();
+            //SwingUtilities.invokeLater(Main::createGUI);
 
         } catch (Exception e) {
             String message = "Something went wrong!\n";
