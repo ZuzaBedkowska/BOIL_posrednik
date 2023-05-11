@@ -61,7 +61,7 @@ class DataFetcher {
         //tutaj wywolanie obliczenia
         //do testow
         logic = new MainLogic(dostawcy, odbiorcy, listConverter(podaz), listConverter(popyt), listConverter(koszt), listConverter(cena), matrixConverter(transport));
-        logic.calc();
+        logic.calc_northWestCorner();
         optTransport = matrixConverter(logic.getOptimal_transport());
         profit = matrixConverter(logic.getIndividual_profit());
 
@@ -146,6 +146,14 @@ class DataFetcher {
 
     public MainLogic getLogic() {
         return logic;
+    }
+
+    public int getDostawcy() {
+        return dostawcy;
+    }
+
+    public int getOdbiorcy() {
+        return odbiorcy;
     }
 }
 
@@ -250,7 +258,7 @@ class GridComponent {
                         gridPanel2.add(AddColumnButton);
                         continue;
                     } else if (rows == 1) {
-                        RemoveColumnButton.setEnabled(width != 3);
+                        RemoveColumnButton.setEnabled(width != 1);
                         gridPanel2.add(RemoveColumnButton);
                         continue;
                     } else {
@@ -261,7 +269,7 @@ class GridComponent {
                         gridPanel2.add(AddRowButton);
                         continue;
                     } else if (cols ==1) {
-                        RemoveRowButton.setEnabled(height != 2);
+                        RemoveRowButton.setEnabled(height != 1);
                         gridPanel2.add(RemoveRowButton);
                         continue;
                     } else {
@@ -338,7 +346,7 @@ class LittleGrid {
     public LittleGrid(){
         mainPanel = new JPanel(new GridLayout(3, 1, 10, 10));
     }
-    public void addGrid(String title, ArrayList<ArrayList<Double>> result) {
+    public void addGrid(int r, int c, String title, ArrayList<ArrayList<Double>> result) {
         JPanel panel = new JPanel(new GridLayout(2, 1));
         JLabel titleLabel = new JLabel(title);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -351,9 +359,15 @@ class LittleGrid {
                 JLabel label = new JLabel("");
                 label.setHorizontalAlignment(SwingConstants.CENTER);
                 if (i == 0 && j != 0){
-                    label.setText("O" + j);
+                    if (c < j)
+                        label.setText("FO");
+                    else
+                        label.setText("O" + j);
                 } else if (j == 0 && i != 0) {
-                    label.setText("D" + i);
+                    if (r < i)
+                        label.setText("FD");
+                    else
+                        label.setText("D" + i);
                 } else if (i != 0){
                     label.setText(Double.toString(result.get(i - 1).get(j - 1)));
                     label.setBorder(new EtchedBorder());
@@ -493,8 +507,8 @@ public class MainUI {
         String title = "Optymalny transport";
         JScrollPane scrollPane = new JScrollPane();
         LittleGrid littleGrid = new LittleGrid();
-        littleGrid.addGrid("Zysk z transportu jednej sztuki towaru od danego dostawcy, do danego odbiorcy", dataFetcher.getProfit());
-        littleGrid.addGrid("Optymalny plan transportu", dataFetcher.getOptTransport());
+        littleGrid.addGrid(dataFetcher.getDostawcy(), dataFetcher.getOdbiorcy(), "Zysk z transportu jednej sztuki towaru od danego dostawcy, do danego odbiorcy", dataFetcher.getProfit());
+        littleGrid.addGrid(dataFetcher.getDostawcy(), dataFetcher.getOdbiorcy(),"Optymalny plan transportu", dataFetcher.getOptTransport());
         littleGrid.addNumData(dataFetcher.getLogic());
         scrollPane.setViewportView(littleGrid.getMainPanel());
         scrollPane.setSize(new Dimension(1000, 1000));

@@ -53,23 +53,6 @@ public class Main {
      */
     public static void main(String[] args) {
         try{
-            //https://cbom.atozmath.com/CBOM/Transportation.aspx?q=vam&q1=-1%2c-42%2c45%2c109%2c0%3b3%2c-38%2c57%2c122%2c0%3b-43%2c-85%2c17%2c81%2c0%3b-16%2c-75%2c36%2c77%2c0%3b24%2c-48%2c14%2c115%2c0%3b-68%2c-87%2c-26%2c54%2c0%3b0%2c0%2c0%2c0%2c0%60110%2c120%2c130%2c140%2c150%2c160%2c900%60210%2c220%2c230%2c240%2c810%60S1%2cS2%2cS3%2cS4%2cS5%2cS6%2cSdummy%60D1%2cD2%2cD3%2cD4%2cDdummy%60vam%60false%60false%60MAX&do=1#PrevPart
-            int n_customers = 4;
-            int n_suppliers = 6;
-            double[] demand = {210, 220, 230, 240};
-            double[] supply = {110, 120, 130, 140, 150, 160};
-            double[] sellPrices = {131, 92, 183, 244};
-            double[] purchasePrices = {121, 112, 153, 124, 95, 156};
-            double[][] transportCostsTable = {
-                    {11, 13, 17, 14},
-                    {16, 18, 14, 10},
-                    {21, 24, 13, 10},
-                    {23, 43, 23, 43},
-                    {12, 45, 74, 34},
-                    {43, 23, 53, 34}
-            };
-            MainLogic mainLogic = new MainLogic(n_suppliers,n_customers,supply,demand,purchasePrices,sellPrices,transportCostsTable);
-            mainLogic.calc();
             SwingUtilities.invokeLater(Main::createGUI);
         } catch (Exception e) {
             String message = "Something went wrong!\n";
