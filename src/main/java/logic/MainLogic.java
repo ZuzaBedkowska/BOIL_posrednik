@@ -60,7 +60,15 @@ public class MainLogic {
             }
         }
     }
-    public void calc(){
+
+    public void calc_northWestCorner(){
+        calculate("northWestCorner");
+    }
+    public void calc_leastCostRule(){
+        calculate("leastCostRule");
+    }
+
+    private void calculate(String optimizer){
         calcProfitTable();
         TransportationProblem transportationProblem = new TransportationProblem(n_suppliers, n_customers); //init
         //add supplies
@@ -74,28 +82,38 @@ public class MainLogic {
             for (int c = 0; c < n_customers; c++)
                 transportationProblem.setCost(reverseProfitTable[s][c], s, c);
         //calc this thing
-        //transportationProblem.northWestCorner();
-        transportationProblem.leastCostRule();
+        if (optimizer.equals("northWestCorner"))
+            transportationProblem.northWestCorner();
+        else if (optimizer.equals("leastCostRule"))
+            transportationProblem.leastCostRule();
         //get solution, save to resultTable
         for (Variable f: transportationProblem.feasible){
             resultTable[f.getStock()][f.getRequired()] = f.getValue();
         }
         //calc profit
-        individual_profit = new double[n_suppliers-1][n_customers-1];
-        optimal_transport = new double[n_suppliers-1][n_customers-1];
+        individual_profit = new double[n_suppliers][n_customers];
+        optimal_transport = new double[n_suppliers][n_customers];
         System.out.println("individual profit= ");
-        for (int s = 0; s < n_suppliers - 1; s++) { //without last
-            for (int c = 0; c < n_customers - 1; c++) { //without last
+        for (int s = 0; s < n_suppliers; s++) {
+            for (int c = 0; c < n_customers; c++) {
                 System.out.print(profitTable[s][c] + " \t");
                 individual_profit[s][c] = profitTable[s][c];
             }
             System.out.println();
         }
         System.out.println("optimal transport= ");
+        for (int s = 0; s < n_suppliers; s++) {
+            for (int c = 0; c < n_customers; c++) {
+                optimal_transport[s][c] = resultTable[s][c];
+                System.out.print(optimal_transport[s][c] + " \t");
+            }
+            System.out.println();
+        }
+
         for (int s = 0; s < n_suppliers - 1; s++) { //without last
             for (int c = 0; c < n_customers - 1; c++) { //without last
-                System.out.print(resultTable[s][c]+" \t");
-                optimal_transport[s][c] = resultTable[s][c];
+                //System.out.print(resultTable[s][c]+" \t");
+                //optimal_transport[s][c] = resultTable[s][c];
                 profit += resultTable[s][c] * profitTable[s][c];
                 cost_purchase += resultTable[s][c] * purchasePrices[s];
                 income_from_sell += resultTable[s][c] * sellPrices[c];
