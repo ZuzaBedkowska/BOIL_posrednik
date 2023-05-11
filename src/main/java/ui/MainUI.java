@@ -3,6 +3,7 @@ package ui;
 import logic.MainLogic;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.util.ArrayList;
@@ -344,15 +345,33 @@ class GridComponent {
 class LittleGrid {
     private final JPanel mainPanel;
     public LittleGrid(){
-        mainPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        mainPanel = new JPanel(new GridLayout(3, 1, 5, 5));
     }
     public void addGrid(int r, int c, String title, ArrayList<ArrayList<Double>> result) {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
+        JPanel panel = new JPanel(new GridLayout(3, 1));
         JLabel titleLabel = new JLabel(title);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Verdana", Font.BOLD, 15));
+        titleLabel.setFont(new Font(titleLabel.getFont().getName(), Font.BOLD, 15));
         panel.add(titleLabel);
-        JPanel gridPanel = new JPanel(new GridLayout(result.size() + 1, result.get(0).size() + 1, 5, 5));
+        JPanel legendPanel = new JPanel(new GridLayout(5, 1));
+        JLabel l1 = new JLabel("Opis użytych symboli:", SwingConstants.CENTER);
+        JLabel l2 = new JLabel("D - dostawca", SwingConstants.CENTER);
+        JLabel l3 = new JLabel("O - odbiorca", SwingConstants.CENTER);
+        JLabel l4 = new JLabel("FD - fikcyjny dostawca", SwingConstants.CENTER);
+        JLabel l5 = new JLabel("FO - fikcyjny odbiorca", SwingConstants.CENTER);
+        Font newLabelFont = new Font(l1.getFont().getName(), Font.ITALIC, l1.getFont().getSize());
+        l1.setFont(newLabelFont);
+        l2.setFont(newLabelFont);
+        l3.setFont(newLabelFont);
+        l4.setFont(newLabelFont);
+        l5.setFont(newLabelFont);
+        legendPanel.add(l1);
+        legendPanel.add(l2);
+        legendPanel.add(l3);
+        legendPanel.add(l4);
+        legendPanel.add(l5);
+        panel.add(legendPanel);
+        JPanel gridPanel = new JPanel(new GridLayout(result.size() + 1, result.get(0).size() + 1));
         //generuj macierz
         for (int i = 0; i < result.size() + 1; ++i) {
             for (int j = 0; j < result.get(0).size() + 1; ++j) {
@@ -380,22 +399,21 @@ class LittleGrid {
         panel.add(gridPanel);
         mainPanel.add(panel);
     }
-
     public void addNumData(MainLogic logic){
-        JPanel numPanel = new JPanel(new GridLayout(6,1, 5, 5));
+        JPanel numPanel = new JPanel(new GridLayout(6,1));
+        numPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         JLabel label = new JLabel("Parametry opisujące optymalny plan transportu");
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setFont(new Font("Verdana", Font.BOLD, 15));
+        label.setFont(new Font(label.getFont().getName(), Font.BOLD, 15));
         numPanel.add(label);
-        numPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        numPanel.add(new JLabel("<html>&#8226;Całkowity koszt transportu: " + (logic.getCost_transport()) + "<html>"));
-        numPanel.add(new JLabel("<html>&#8226;Całkowity koszt zakupu: " +(logic.getCost_purchase()) + "<html>"));
-        numPanel.add(new JLabel("<html>&#8226;Koszt całkowity: "+(logic.getCost_purchase()) +
-                " + " + (logic.getCost_transport()) + " = " + (logic.getCost_transport() + logic.getCost_purchase())  + "<html>"));
-        numPanel.add(new JLabel("<html>&#8226;Całkowity zysk ze sprzedaży: " + logic.getIncome_from_sell() + "<html>"));
-        numPanel.add(new JLabel("<html>&#8226;Całkowity zysk z wykonania planu transportu: " +
+        numPanel.add(new JLabel("Całkowity koszt transportu: " + (logic.getCost_transport())));
+        numPanel.add(new JLabel("Całkowity koszt zakupu: " +(logic.getCost_purchase())));
+        numPanel.add(new JLabel("Koszt całkowity: "+(logic.getCost_purchase()) +
+                " + " + (logic.getCost_transport()) + " = " + (logic.getCost_transport() + logic.getCost_purchase())));
+        numPanel.add(new JLabel("Całkowity zysk ze sprzedaży: " + logic.getIncome_from_sell()));
+        numPanel.add(new JLabel("Całkowity zysk z wykonania planu transportu: " +
                 logic.getIncome_from_sell() + " - " + (logic.getCost_transport() + logic.getCost_purchase()) + " = " +
-                (logic.getIncome_from_sell() - (logic.getCost_transport() + logic.getCost_purchase()))  + "<html>"));
+                (logic.getIncome_from_sell() - (logic.getCost_transport() + logic.getCost_purchase()))));
         mainPanel.add(numPanel);
     }
 
@@ -513,7 +531,7 @@ public class MainUI {
         scrollPane.setViewportView(littleGrid.getMainPanel());
         scrollPane.setSize(new Dimension(1000, 1000));
         scrollPane.setPreferredSize(new Dimension(700, scrollPane.getPreferredSize().height));
-        JOptionPane.showConfirmDialog(null, scrollPane, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showConfirmDialog(null, scrollPane, title, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
 
     }
     public void createAddColumnButton() {
