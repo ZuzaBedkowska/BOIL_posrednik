@@ -1,5 +1,7 @@
 package ui;
 
+import logic.MainLogic;
+
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
@@ -7,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 class DataFetcher {
+
+    private MainLogic logic;
     private final int dostawcy;
     private final int odbiorcy;
     private final ArrayList<Double> popyt;
@@ -14,7 +18,8 @@ class DataFetcher {
     private final ArrayList<Double> cena;
     private final ArrayList<Double> koszt;
     private final ArrayList<ArrayList<Double>> transport;
-    private ArrayList<ArrayList<Double>> result;
+    private ArrayList<ArrayList<Double>> optTransport;
+    private ArrayList<ArrayList<Double>> profit;
     public DataFetcher(int dostawcy, int odbiorcy) {
         this.dostawcy = dostawcy;
         this.odbiorcy = odbiorcy;
@@ -23,9 +28,12 @@ class DataFetcher {
         koszt = new ArrayList<>(Collections.nCopies(dostawcy, 0.));
         podaz = new ArrayList<>(Collections.nCopies(dostawcy, 0.));
         transport = new ArrayList<>(dostawcy);
-        result = new ArrayList<>();
+        optTransport = new ArrayList<>(dostawcy);
+        profit = new ArrayList<>(dostawcy);
         for (int i = 0; i< dostawcy; ++i) {
             transport.add(new ArrayList<>(Collections.nCopies(odbiorcy, 0.)));
+            optTransport.add(new ArrayList<>(Collections.nCopies(odbiorcy, 0.)));
+            profit.add(new ArrayList<>(Collections.nCopies(odbiorcy, 0.)));
         }
     }
 
@@ -52,15 +60,42 @@ class DataFetcher {
     public void optimizeTransport() {
         //tutaj wywolanie obliczenia
         //do testow
-        result = new ArrayList<>(dostawcy);
-        for (int i = 0; i< dostawcy; ++i) {
-            result.add(new ArrayList<>());
-            for (int j = 0; j< odbiorcy; ++j) {
-                result.get(i).add(i + j/10.0);
-            }
-        }
+        logic = new MainLogic(dostawcy, odbiorcy, listConverter(podaz), listConverter(popyt), listConverter(koszt), listConverter(cena), matrixConverter(transport));
+        logic.calc();
+        optTransport = matrixConverter(logic.getOptimal_transport());
+        profit = matrixConverter(logic.getIndividual_profit());
+
     }
 
+    private ArrayList<ArrayList<Double>> matrixConverter(double [][] array) {
+        ArrayList<ArrayList<Double>> list = new ArrayList<>();
+        for (double[] doubles : array) {
+            ArrayList<Double> innerList = new ArrayList<>();
+            for (double aDouble : doubles) {
+                innerList.add(aDouble);
+            }
+            list.add(innerList);
+        }
+        return list;
+    }
+
+    private double[][] matrixConverter(ArrayList<ArrayList<Double>> list) {
+        double [][] res = new double[list.size()][list.get(0).size()];
+        for (int i = 0; i < list.size(); ++i) {
+            for (int j = 0; j < list.get(0).size(); ++j) {
+                res[i][j] = list.get(i).get(j);
+            }
+        }
+        return res;
+    }
+
+    private double[] listConverter(ArrayList<Double> list) {
+        double [] res = new double[list.size()];
+        for (int i = 0; i < list.size(); ++i) {
+            res[i] = list.get(i);
+        }
+        return res;
+    }
     public ArrayList<Double> getPopyt() {
         return popyt;
     }
@@ -101,16 +136,16 @@ class DataFetcher {
         this.transport.get(row).set(col, value);
     }
 
-    public ArrayList<ArrayList<Double>> getResult() {
-        return result;
+    public ArrayList<ArrayList<Double>> getOptTransport() {
+        return optTransport;
     }
 
-    public int getDostawcy() {
-        return dostawcy;
+    public ArrayList<ArrayList<Double>> getProfit() {
+        return profit;
     }
 
-    public int getOdbiorcy() {
-        return odbiorcy;
+    public MainLogic getLogic() {
+        return logic;
     }
 }
 
@@ -203,11 +238,11 @@ class GridComponent {
                 if (rows < 2 && cols < 2) {
                     textField.setVisible(false);
                 } else if(rows == 0 && cols < newWidth-1){
-                    desc = "Cena dla Odbiorcy " + (cols - 1);
+                    desc = "Cena sprzedaży Odbiorcy " + (cols - 1);
                 } else if(rows == 1 && cols < newWidth-1){
                     desc = "Popyt Odbiorcy " + (cols - 1);
                 } else if(cols == 0 && rows < newHeight-1){
-                    desc = "Koszt dla Dostawcy  " + (rows - 1);
+                    desc = "Koszt zakupu Dostawcy  " + (rows - 1);
                 } else if(cols == 1 && rows < newHeight-1){
                     desc = "Podaż Dostawcy  " + (rows - 1);
                 } else if (cols == newWidth-1) { //guzik dodaj
@@ -295,6 +330,63 @@ class GridComponent {
 
     public ArrayList<ArrayList<TextField>> getTextFields() {
         return textFields;
+    }
+}
+
+class LittleGrid {
+    private final JPanel mainPanel;
+    public LittleGrid(){
+        mainPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+    }
+    public void addGrid(String title, ArrayList<ArrayList<Double>> result) {
+        JPanel panel = new JPanel(new GridLayout(2, 1));
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Verdana", Font.BOLD, 15));
+        panel.add(titleLabel);
+        JPanel gridPanel = new JPanel(new GridLayout(result.size() + 1, result.get(0).size() + 1, 5, 5));
+        //generuj macierz
+        for (int i = 0; i < result.size() + 1; ++i) {
+            for (int j = 0; j < result.get(0).size() + 1; ++j) {
+                JLabel label = new JLabel("");
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                if (i == 0 && j != 0){
+                    label.setText("O" + j);
+                } else if (j == 0 && i != 0) {
+                    label.setText("D" + i);
+                } else if (i != 0){
+                    label.setText(Double.toString(result.get(i - 1).get(j - 1)));
+                    label.setBorder(new EtchedBorder());
+                    label.setOpaque(true);
+                    label.setBackground(Color.white);
+                }
+                gridPanel.add(label);
+            }
+        }
+        panel.add(gridPanel);
+        mainPanel.add(panel);
+    }
+
+    public void addNumData(MainLogic logic){
+        JPanel numPanel = new JPanel(new GridLayout(6,1, 5, 5));
+        JLabel label = new JLabel("Parametry opisujące optymalny plan transportu");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setFont(new Font("Verdana", Font.BOLD, 15));
+        numPanel.add(label);
+        numPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        numPanel.add(new JLabel("<html>&#8226;Całkowity koszt transportu: " + (logic.getCost_transport()) + "<html>"));
+        numPanel.add(new JLabel("<html>&#8226;Całkowity koszt zakupu: " +(logic.getCost_purchase()) + "<html>"));
+        numPanel.add(new JLabel("<html>&#8226;Koszt całkowity: "+(logic.getCost_purchase()) +
+                " + " + (logic.getCost_transport()) + " = " + (logic.getCost_transport() + logic.getCost_purchase())  + "<html>"));
+        numPanel.add(new JLabel("<html>&#8226;Całkowity zysk ze sprzedaży: " + logic.getIncome_from_sell() + "<html>"));
+        numPanel.add(new JLabel("<html>&#8226;Całkowity zysk z wykonania planu transportu: " +
+                logic.getIncome_from_sell() + " - " + (logic.getCost_transport() + logic.getCost_purchase()) + " = " +
+                (logic.getIncome_from_sell() - (logic.getCost_transport() + logic.getCost_purchase()))  + "<html>"));
+        mainPanel.add(numPanel);
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 }
 
@@ -400,26 +492,13 @@ public class MainUI {
     public void displayResult(){
         String title = "Optymalny transport";
         JScrollPane scrollPane = new JScrollPane();
-        JPanel panel = new JPanel(new GridLayout(dataFetcher.getDostawcy() + 1, dataFetcher.getOdbiorcy() + 1, 5, 5));
-        //generuj macierz
-        for (int i = 0; i < dataFetcher.getDostawcy() + 1; ++i) {
-            for (int j = 0; j < dataFetcher.getOdbiorcy() + 1; ++j) {
-                JLabel label = new JLabel("");
-                label.setHorizontalAlignment(SwingConstants.CENTER);
-                if (i == 0 && j != 0){
-                    label.setText("O" + j);
-                } else if (j == 0 && i != 0) {
-                    label.setText("D" + i);
-                } else if (i != 0){
-                    label.setText(Double.toString(dataFetcher.getResult().get(i - 1).get(j - 1)));
-                    label.setBorder(new EtchedBorder());
-                    label.setOpaque(true);
-                    label.setBackground(Color.white);
-                }
-                panel.add(label);
-            }
-        }
-        scrollPane.setViewportView(panel);
+        LittleGrid littleGrid = new LittleGrid();
+        littleGrid.addGrid("Zysk z transportu jednej sztuki towaru od danego dostawcy, do danego odbiorcy", dataFetcher.getProfit());
+        littleGrid.addGrid("Optymalny plan transportu", dataFetcher.getOptTransport());
+        littleGrid.addNumData(dataFetcher.getLogic());
+        scrollPane.setViewportView(littleGrid.getMainPanel());
+        scrollPane.setSize(new Dimension(1000, 1000));
+        scrollPane.setPreferredSize(new Dimension(700, scrollPane.getPreferredSize().height));
         JOptionPane.showConfirmDialog(null, scrollPane, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
     }
