@@ -159,7 +159,7 @@ class DataFetcher {
 }
 
 class TextField {
-    private final JPanel panel;
+    private JPanel panel;
     private final int row;
     private final int col;
 
@@ -173,6 +173,7 @@ class TextField {
         panel = new JPanel(new GridLayout(1,1));
     }
     public void makePanel(String desc) {
+        panel = new JPanel(new GridLayout(1,1));
         if (!desc.equals("")) {
             panel.setLayout(new GridLayout(2,1));
             JLabel label = new JLabel(desc, SwingConstants.CENTER);
@@ -235,17 +236,21 @@ class GridComponent {
         GridLayout layout = new GridLayout(newHeight, newWidth, 5, 5);
         gridPanel2.setLayout(layout);
         ArrayList<ArrayList<TextField>> textFields2 = new ArrayList<>(newHeight);
-        for (int i = 0; i < heightWithButtons; ++i) {
+        for (int i = 0; i < newHeight; ++i) {
             textFields2.add(new ArrayList<>());
         }
         for (int rows = 0; rows < newHeight; ++rows) {
             for (int cols = 0; cols < newWidth; ++ cols) {
                 //rog bez niczego
+                boolean visibility = true;
                 TextField textField = new TextField(rows, cols,0);
+                if (cols < Math.min(textFields.get(0).size(), newWidth-1) && rows < Math.min(textFields.size(), newHeight-1)) {
+                    textField = textFields.get(rows).get(cols);
+                }
                 textFields2.get(rows).add(textField);
                 String desc = "";
                 if (rows < 2 && cols < 2) {
-                    textField.setVisible(false);
+                    visibility = false;
                 } else if(rows == 0 && cols < newWidth-1){
                     desc = "Cena sprzedaży Odbiorcy " + (cols - 1);
                 } else if(rows == 1 && cols < newWidth-1){
@@ -263,7 +268,7 @@ class GridComponent {
                         gridPanel2.add(RemoveColumnButton);
                         continue;
                     } else {
-                        textField.setVisible(false);
+                        visibility = false;
                     }
                 } else if (rows == newHeight - 1) {
                     if (cols == 0) {
@@ -274,10 +279,11 @@ class GridComponent {
                         gridPanel2.add(RemoveRowButton);
                         continue;
                     } else {
-                        textField.setVisible(false);
+                        visibility = false;
                     }
                 }
                 textField.makePanel(desc);
+                textField.setVisible(visibility);
                 gridPanel2.add(textField.getPanel());
             }
         }
