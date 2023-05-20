@@ -1,4 +1,6 @@
 package logic;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 public class TransportationProblem {
     double [] required;
@@ -13,10 +15,12 @@ public class TransportationProblem {
     int stockSize;
     int requiredSize;
 
+    double profit;
+
     public TransportationProblem(int stockSize, int requiredSize ){
         this.stockSize = stockSize;
         this.requiredSize = requiredSize;
-
+        this.profit = 0;
         stock = new double[stockSize];
         required = new double[requiredSize];
         alphas = new double[stockSize];
@@ -75,7 +79,7 @@ public class TransportationProblem {
 
         double max;
         int k = 0; //feasible solutions counter
-
+        double newProfit = 0;
         //isSet is responsible for annotating cells that have been allocated
         boolean [][]isSet = new boolean[stockSize][requiredSize];
         for (int j = 0; j < requiredSize; j++)
@@ -125,6 +129,7 @@ public class TransportationProblem {
             feasible.get(k).setStock(i);
             feasible.get(k).setValue(max);
             transport[i][j] = max;
+            newProfit+= cost[i][j]*transport[i][j];
             k++;
 
             required[j] -= max;
@@ -138,6 +143,7 @@ public class TransportationProblem {
                 for(int l = 0; l < stockSize; l++)
                     isSet[l][j] = true;
         }
+        profit = newProfit;
         this.optimize();
         System.nanoTime();
     }
@@ -157,7 +163,7 @@ public class TransportationProblem {
                 for (int j = 0; j < transport[0].length; ++j) {
                     if (transport[i][j] == 0) {
                         deltas[i][j] = cost[i][j] - alphas[i] - betas[j];
-                        if (deltas[i][j] >= 0) {
+                        if (deltas[i][j] > 0) {
                             detlaCheckerX = j;
                             deltaCheckerY = i;
                         }
@@ -166,13 +172,15 @@ public class TransportationProblem {
                     }
                 }
             }
-            printMatrix(deltas);
             // 3. check if solution can be optimized
             if (detlaCheckerX == -1) { //is optimal, no deltas >= 0
                 break;
             }
             //4. optimize solution = move transport form cell to cell
-            moveTransport(detlaCheckerX, deltaCheckerY);
+            //if there was no movement, solution cant be found
+            if(!moveTransport(detlaCheckerX, deltaCheckerY)) {
+                break;
+            }
         }
     }
 
@@ -205,15 +213,19 @@ public class TransportationProblem {
             }
         }
     }
-    private void moveTransport(int x, int y) {
+    private boolean moveTransport(int x, int y) {
         //1. look for 2 cells with transport - one in the same row and one in the same column
-        int [] cellInRow = new int[] {-1, -1};
-        int [] cellInCollumn = new int[] {-1, -1};
+        ArrayList<int[]> cellsInRow = new ArrayList<>();
+        ArrayList<int[]> cellsInCollumn = new ArrayList<>();
+        int[] cellInRow = new int[]{-1, -1};
+        int[] cellInCollumn = new int[]{-1, -1};
         //looking in the same row
+        //if there are more than one cell suitable, check quality of solution of each suitable cell
         for (int i = 0; i < transport[0].length; ++i) {
             if (transport[y][i] > 0) {
                 cellInRow[0] = y;
                 cellInRow[1] = i;
+                cellsInRow.add(cellInRow);
             }
         }
         //looking in a column
@@ -221,27 +233,48 @@ public class TransportationProblem {
             if (transport[i][x] > 0) {
                 cellInCollumn[0] = i;
                 cellInCollumn[1] = x;
+                cellsInCollumn.add(cellInCollumn);
             }
+        }
+        //if there are no available cells - no change possible
+        if (cellInRow[0] == -1|| cellInCollumn[0] == -1) {
+            return false;
+        }
+        //check solutions
+        for (int[] ints : cellsInCollumn) {
+            for (int[] value : cellsInRow) {
+                if(checkSolution(ints, value, x, y)) { //if change was made, return change
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkSolution(int[] cellInCollumn, int[] cellInRow, int x, int y) {
+        double [][] transportCopy = new double[transport.length][transport[0].length];
+        for (int i = 0; i < transportCopy.length; i++) {
+            System.arraycopy(transport[i], 0, transportCopy[i], 0, transportCopy[0].length);
         }
         //2. check max value to move
-        double max = Math.min(transport[y][cellInRow[1]], transport[cellInCollumn[0]][x]);
+        double max = Math.min(transportCopy[y][cellInRow[1]], transportCopy[cellInCollumn[0]][x]);
         //3. move the value = substract the value from cell in row and cell in column, and add value to the desired cell, and opposing cell
-        transport[y][cellInRow[1]] -= max;
-        transport[cellInCollumn[0]][x] -= max;
-        transport[y][x] += max;
-        transport[cellInCollumn[0]][cellInRow[1]] += max;
-    }
-
-    public static void printMatrix(double[][] matrix) {
-        int cols = matrix[0].length;
-
-        for (double[] doubles : matrix) {
-            for (int j = 0; j < cols; j++) {
-                System.out.print(doubles[j] + " ");
+        transportCopy[y][cellInRow[1]] -= max;
+        transportCopy[cellInCollumn[0]][x] -= max;
+        transportCopy[y][x] += max;
+        transportCopy[cellInCollumn[0]][cellInRow[1]] += max;
+        double newProfit = 0;
+        for (int i = 0; i < transportCopy.length; ++i) {
+            for (int j = 0; j < transportCopy[0].length; ++j) {
+                newProfit+= cost[i][j]*transportCopy[i][j];
             }
-            System.out.println();
         }
-        System.out.println();
+        //if new profit>profit = successful change, save transport
+        if (newProfit>profit) {
+            profit = newProfit;
+            transport = transportCopy;
+            return true;
+        }
+        return false;
     }
-
 }

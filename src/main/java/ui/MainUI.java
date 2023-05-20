@@ -61,11 +61,31 @@ class DataFetcher {
     public void optimizeTransport() {
         //tutaj wywolanie obliczenia
         //do testow
+        printList(podaz);
+        printList(popyt);
+        printList(koszt);
+        printList(cena);
+        printMatrix(transport);
         logic = new MainLogic(dostawcy, odbiorcy, listConverter(podaz), listConverter(popyt), listConverter(koszt), listConverter(cena), matrixConverter(transport));
-        logic.calc_northWestCorner();
+        logic.calc_maxProfitRule();
         optTransport = matrixConverter(logic.getOptimal_transport());
         profit = matrixConverter(logic.getIndividual_profit());
 
+    }
+    private void printMatrix(ArrayList<ArrayList<Double>> matrix) {
+        for (ArrayList<Double> ds: matrix) {
+            for (double d: ds) {
+                System.out.print(d + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+    private void printList(ArrayList<Double> list) {
+        for (double d: list) {
+            System.out.print(d + " ");
+        }
+        System.out.println();
     }
 
     private ArrayList<ArrayList<Double>> matrixConverter(double [][] array) {

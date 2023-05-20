@@ -124,7 +124,7 @@ public class MainLogic {
         System.out.println("income_from_sell = "+income_from_sell);
         System.out.println("profit           = "+profit);
     }
-    private void calcProfitTable(){
+    public void calcProfitTable(){
         //dumbest approach ever
         for(int s = 0; s < n_suppliers; s++)
             for (int c = 0; c < n_customers; c++)
@@ -146,6 +146,6 @@ public class MainLogic {
     public double getCost_purchase() { return cost_purchase; }
     public double getCost_transport() { return cost_transport; }
     public double getIncome_from_sell() { return income_from_sell; }
-    public double[][] getIndividual_profit() { return individual_profit; }
+    public double[][] getIndividual_profit() { return profitTable; }
     public double[][] getOptimal_transport() { return optimal_transport; }
 }
