@@ -51,7 +51,7 @@ public class MainLogic {
         }
         for (int c = 0; c < n_customers; c++) {
             if (c == this.n_customers-1 ) { //dummies
-                this.demand[c] =  Arrays.stream(supply).sum();;
+                this.demand[c] =  Arrays.stream(supply).sum();
                 this.sellPrices[c] = 0;
             }
             else { //rest
@@ -64,8 +64,8 @@ public class MainLogic {
     public void calc_northWestCorner(){
         calculate("northWestCorner");
     }
-    public void calc_leastCostRule(){
-        calculate("leastCostRule");
+    public void calc_maxProfitRule(){
+        calculate("maxProfitRule");
     }
 
     private void calculate(String optimizer){
@@ -80,16 +80,14 @@ public class MainLogic {
         //add transportation costs
         for (int s = 0; s < n_suppliers; s++)
             for (int c = 0; c < n_customers; c++)
-                transportationProblem.setCost(reverseProfitTable[s][c], s, c);
+                transportationProblem.setCost(profitTable[s][c], s, c);
         //calc this thing
         if (optimizer.equals("northWestCorner"))
             transportationProblem.northWestCorner();
-        else if (optimizer.equals("leastCostRule"))
-            transportationProblem.leastCostRule();
+        else if (optimizer.equals("maxProfitRule"))
+            transportationProblem.maxProfitRule();
         //get solution, save to resultTable
-        for (Variable f: transportationProblem.feasible){
-            resultTable[f.getStock()][f.getRequired()] = f.getValue();
-        }
+        resultTable=transportationProblem.getTransport();
         //calc profit
         individual_profit = new double[n_suppliers][n_customers];
         optimal_transport = new double[n_suppliers][n_customers];
@@ -145,7 +143,6 @@ public class MainLogic {
                 reverseProfitTable[s][c] = maxValue - profitTable[s][c];
     }
 
-    public double getProfit() { return profit; }
     public double getCost_purchase() { return cost_purchase; }
     public double getCost_transport() { return cost_transport; }
     public double getIncome_from_sell() { return income_from_sell; }
