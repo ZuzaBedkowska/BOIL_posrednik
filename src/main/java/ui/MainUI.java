@@ -61,11 +61,31 @@ class DataFetcher {
     public void optimizeTransport() {
         //tutaj wywolanie obliczenia
         //do testow
+        printList(podaz);
+        printList(popyt);
+        printList(koszt);
+        printList(cena);
+        printMatrix(transport);
         logic = new MainLogic(dostawcy, odbiorcy, listConverter(podaz), listConverter(popyt), listConverter(koszt), listConverter(cena), matrixConverter(transport));
-        logic.calc_northWestCorner();
+        logic.calc_maxProfitRule();
         optTransport = matrixConverter(logic.getOptimal_transport());
         profit = matrixConverter(logic.getIndividual_profit());
 
+    }
+    private void printMatrix(ArrayList<ArrayList<Double>> matrix) {
+        for (ArrayList<Double> ds: matrix) {
+            for (double d: ds) {
+                System.out.print(d + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+    private void printList(ArrayList<Double> list) {
+        for (double d: list) {
+            System.out.print(d + " ");
+        }
+        System.out.println();
     }
 
     private ArrayList<ArrayList<Double>> matrixConverter(double [][] array) {
@@ -351,12 +371,16 @@ class GridComponent {
 class LittleGrid {
     private final JPanel mainPanel;
     public LittleGrid(){
-        mainPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
     public void addGrid(int r, int c, String title, ArrayList<ArrayList<Double>> result) {
-        JPanel panel = new JPanel(new GridLayout(3, 1));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         JLabel titleLabel = new JLabel(title);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setFont(new Font(titleLabel.getFont().getName(), Font.BOLD, 15));
         panel.add(titleLabel);
         JPanel legendPanel = new JPanel(new GridLayout(5, 1));
@@ -406,10 +430,11 @@ class LittleGrid {
         mainPanel.add(panel);
     }
     public void addNumData(MainLogic logic){
-        JPanel numPanel = new JPanel(new GridLayout(6,1));
+        JPanel numPanel = new JPanel();
+        numPanel.setLayout(new BoxLayout(numPanel, BoxLayout.Y_AXIS));
         numPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         JLabel label = new JLabel("Parametry opisujące optymalny plan transportu");
-        label.setHorizontalAlignment(SwingConstants.CENTER);
+        numPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         label.setFont(new Font(label.getFont().getName(), Font.BOLD, 15));
         numPanel.add(label);
         numPanel.add(new JLabel("Całkowity koszt transportu: " + (logic.getCost_transport())));
